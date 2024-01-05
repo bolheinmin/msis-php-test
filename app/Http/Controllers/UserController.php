@@ -28,37 +28,48 @@ class UserController extends Controller
 
     public function learnCourse($courseId)
     {
-        $user = Auth::user();
+        $user_id = Auth::user()->id;
         $course = Course::findOrFail($courseId);
+
+        $progress = Progress::where('user_id', $user_id)
+            ->where('course_id', $courseId)
+            ->first();
+
         $totalLessons = $course->lessons->count();
-        $completedLessons = Progress::where('course_id', $courseId)->pluck('completed_lessons')->count();
-        $lessonProgress = ($completedLessons / $totalLessons) * 100;
+        $completedLessons = json_decode($progress->completed_lessons, true);
+        $lessonProgress = (count($completedLessons) / $totalLessons) * 100;
 
-        $completedLessonData = Progress::where('course_id', $courseId)->pluck('completed_lessons')->toArray();
-        $firstElement = isset($originalArray[0]) ? $completedLessonData[0] : null;
+//        dd(count($completedLessons));
 
-        if ($firstElement !== null) {
-            $decodedArray = json_decode($firstElement, true);
-            $completedLessonArr = array_map('intval', $decodedArray);
-
-//            dd($completedLessonArr);
-        } else {
-            $completedLessonArr = [];
-//            dd($completedLessonArr);
-        }
-        return view('frontend.learn_course', compact('course','lessonProgress', 'completedLessonArr'));
+        return view('frontend.learn_course', compact('course','lessonProgress', 'completedLessons'));
     }
 
     public function completeLesson(Request $request)
     {
         $user = Auth::user();
-        $progress = new Progress();
-        $progress->user_id = $user->id;
-        $progress->course_id = $request->course_id;
-        $progress->completed_lessons = $request->checkedIds;
-        $progress->save();
+        $progress = Progress::where('user_id', $user->id)
+            ->where('course_id', $request->course_id)
+            ->first();
 
-        return 'success';
+        if ($progress) {
+            // If the record exists, retrieve existing completed lessons and merge with new values
+            $completedLessons = json_decode($progress->completed_lessons, true) ?? [];
+            $newCompletedLessons = json_decode($request->checkedIds, true) ?? [];
+            $mergedCompletedLessons = array_unique(array_merge($completedLessons, $newCompletedLessons));
+
+            // Update the existing record with the merged completed lessons
+            $progress->update(['completed_lessons' => json_encode($mergedCompletedLessons)]);
+        } else {
+            // If the record doesn't exist, create a new one with the new values
+            Progress::create([
+                'user_id' => $user->id,
+                'course_id' => $request->course_id,
+                'completed_lessons' => $request->checkedIds
+            ]);
+        }
+
+
+        return response()->json($progress);
 
     }
 

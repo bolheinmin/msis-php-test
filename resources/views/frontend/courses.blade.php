@@ -113,7 +113,7 @@
             <div class="row">
             @foreach($courses as $course)
             <div class="col-lg-4 col-md-6 col-sm-12">
-                <div class="card">
+                <div class="card mb-4">
                     <div class="card-body">
                         <div class="text-center mb-3">
                             <h3>{{ $course->title }}</h3>

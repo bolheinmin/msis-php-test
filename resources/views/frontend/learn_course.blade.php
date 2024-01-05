@@ -23,7 +23,13 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
-
+    <style>
+        .accordion-item{
+            margin-bottom: 10px;
+            border-radius: 0px !important;
+            box-shadow: 0px 1px 4px 0px #bfbfbf;
+        }
+    </style>
 </head>
 <body>
 <div class="container-fluid">
@@ -107,7 +113,7 @@
         <!-- Container wrapper -->
     </nav>
     <!-- Navbar -->
-    <div class=" pt-3" style="background: #eee; height: 100vh;">
+    <div class="p-3" style="background: #eee;">
         <h3 class="text-primary text-center">{{ $course->title }}</h3>
         <div class="container">
             <div class="card mb-4">
@@ -160,11 +166,17 @@
                         </div>
                     </div>
                     <h6 class="mb-2 pb-1">Lesson Progress: </h6>
+                    <div class="progress mb-4" style="height: 20px;">
+                        <div class="progress-bar" role="progressbar" style="width: {{ $lessonProgress }}%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">{{ round($lessonProgress) }}%</div>
+                    </div>
+
+                    <h6 class="mb-2 pb-1">Assessment Progress: </h6>
                     <div class="progress" style="height: 20px;">
                         <div class="progress-bar" role="progressbar" style="width: {{ $lessonProgress }}%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">{{ round($lessonProgress) }}%</div>
                     </div>
                 </div>
             </div>
+
             <div class="card">
                 <div class="card-body">
                     <div class="row">
@@ -172,16 +184,25 @@
                             <div class="card border border-primary">
                                 <div class="card-header">Lessons</div>
                                 <div class="card-body">
-                                    @foreach($course->lessons as $lesson)
-                                    <div class="form-check">
-                                        <input class="form-check-input lesson-check" type="checkbox"
-                                               data-id="{{ $lesson->id }}" value="" id="{{ $lesson->id }}"
-                                            {{ in_array($lesson->id, $completedLessonArr) ? 'checked' : '' }}
-                                        />
-
-                                        <label class="form-check-label" for="{{ $lesson->id }}">{{ $lesson->title }}</label>
+                                    <div class="accordion">
+                                        @foreach($course->lessons as $lesson)
+                                        <div class="accordion-item">
+                                            <div class="accordion-header" id="lessons-heading-{{ $lesson->id }}">
+                                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#lessons-collapse-{{ $lesson->id }}" aria-expanded="true" aria-controls="lessons-collapse-{{ $lesson->id }}">
+                                                        <input class="form-check-input lesson-check" type="checkbox"
+                                                               data-id="{{ $lesson->id }}" value="" id="{{ $lesson->id }}"
+                                                            {{ in_array($lesson->id, $completedLessons) ? 'checked' : '' }}/>
+                                                        <label class="form-check-label" for="{{ $lesson->id }}">{{ $lesson->title }}</label>
+                                                </button>
+                                            </div>
+                                            <div id="lessons-collapse-{{ $lesson->id }}" class="accordion-collapse collapse" aria-labelledby="lessons-heading-{{ $lesson->id }}">
+                                                <div class="accordion-body ms-3">
+                                                    <p class="text-muted">{{ $lesson->content }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @endforeach
                                     </div>
-                                    @endforeach
                                 </div>
                             </div>
                         </div>
@@ -189,23 +210,40 @@
                             <div class="card border border-primary">
                                 <div class="card-header">Assessments</div>
                                 <div class="card-body">
-                                    @foreach($course->assessments as $assessment)
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" value="" id="{{$assessment->id}}" />
-                                            <label class="form-check-label" for="{{$assessment->id}}">{{ $assessment->title }}</label>
-                                        </div>
-                                    @endforeach
+                                    <div class="accordion">
+                                        @foreach($course->assessments as $assessment)
+                                            <div class="accordion-item">
+                                                <div class="accordion-header" id="assessment-heading-{{ $assessment->id }}">
+                                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#assessment-collapse-{{ $assessment->id }}" aria-expanded="true" aria-controls="assessment-collapse-{{ $assessment->id }}">
+                                                        <input class="form-check-input assessment-check" type="checkbox"
+                                                               data-id="{{ $assessment->id }}" value="" id="assessment-checkbox-{{ $assessment->id }}"
+                                                            {{ in_array($assessment->id, $completedLessons) ? 'checked' : '' }}/>
+                                                        <label class="form-check-label" for="assessment-checkbox-{{ $assessment->id }}">{{ $assessment->title }}</label>
+                                                    </button>
+                                                </div>
+                                                <div id="assessment-collapse-{{ $assessment->id }}" class="accordion-collapse collapse" aria-labelledby="assessment-heading-{{ $assessment->id }}">
+                                                    <div class="accordion-body ms-3">
+                                                        @php
+                                                        $i = 1;
+                                                        @endphp
+                                                        @foreach ($assessment->questions as $question)
+                                                            <p class="text pb-0 mb-2">Question: {{ $i++ }} - {{ $question['question'] }}</p>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
         </div>
-
     </div>
 </div>
+
 <!-- Bootstrap -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <!-- MDB -->
@@ -242,8 +280,7 @@
         loadCheckboxState();
         let course_id = {{ $course->id }};
 
-// Add change event listener to checkboxes
-        $('.lesson-check').change(function() {
+        $('.lesson-check').change(function () {
             // Save the state of checkboxes in localStorage
             saveCheckboxState();
 
@@ -267,13 +304,19 @@
 
         function saveCheckboxState() {
             // Get an array of checked data-ids
-            var checkedIds = $('.lesson-check:checked').map(function() {
+            var checkedIds = $('.lesson-check:checked').map(function () {
                 return $(this).data('id');
             }).get();
 
-            // Convert the array to JSON and save in localStorage
-            localStorage.setItem('checkedIds', JSON.stringify(checkedIds));
+            // If there are no checked checkboxes, remove the 'checkedIds' from localStorage
+            if (checkedIds.length === 0) {
+                localStorage.removeItem('checkedIds');
+            } else {
+                // Convert the array to JSON and save in localStorage
+                localStorage.setItem('checkedIds', JSON.stringify(checkedIds));
+            }
         }
+
 
         function sendCheckboxStateToServer() {
             // Get the state from localStorage
@@ -290,16 +333,17 @@
                     // Additional data to send to the server if needed
                 },
                 dataType: 'json',
-                success: function(res) {
+                success: function (res) {
                     // Remove the localStorage data after successful AJAX request
                     localStorage.removeItem('checkedIds');
                     // console.log('Checked IDs sent to server:', res);
                 },
-                error: function(err) {
+                error: function (err) {
                     // console.error('Error sending checked IDs to server:', err);
                 },
             });
         }
+
 
         $('#logout-btn').on('click', function (e){
             e.preventDefault();
