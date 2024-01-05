@@ -1,0 +1,117 @@
+body {
+    padding: 0;
+    margin: 0;
+}
+/*------- MD Bootstrap ---------*/
+.nav-tabs .nav-link {
+    text-transform: none !important;
+}
+
+/*------ DataTable ------*/
+mark{
+    background: yellow;
+    color: black;
+}
+@media screen and (max-width: 767px){
+    div.dataTables_wrapper div.dataTables_length,
+    div.dataTables_wrapper div.dataTables_filter,
+    div.dataTables_wrapper div.dataTables_info,
+    div.dataTables_wrapper div.dataTables_paginate {
+        text-align: start;
+    }
+
+    div.dataTables_wrapper div.dataTables_length label {
+        font-weight: normal;
+        text-align: left;
+        white-space: nowrap;
+        margin-bottom: 5px;
+    }
+    div.dataTables_wrapper div.dataTables_paginate ul.pagination {
+        justify-content: end !important;
+    }
+}
+
+/*------------ Date Range Picker---------------*/
+.daterangepicker {
+    position: absolute;
+    color: inherit;
+    background-color: #eee;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    /*width: 278px;*/
+    max-width: none;
+    padding: 0;
+    margin-top: 7px;
+    top: 100px;
+    left: 20px;
+    z-index: 3001;
+    display: none;
+    font-family: arial;
+    font-size: 15px;
+    line-height: 1em;
+}
+.daterangepicker .drp-calendar.left {
+    clear: left;
+    margin-right: 8px;
+}
+.daterangepicker select.hourselect, .daterangepicker select.minuteselect, .daterangepicker select.secondselect, .daterangepicker select.ampmselect {
+    width: 50px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid #eee;
+    padding: 6px;
+    outline: 0;
+    font-size: 12px;
+}
+
+/*----------- Select 2  --------------*/
+was-validated .form-select:invalid~.invalid-feedback, .form-select.is-invalid~.invalid-feedback {
+    margin-top: 35px !important;
+}
+.select2-container {
+    display: block;
+    margin: 0;
+    min-width: 200px;
+    position: relative;
+    padding: 5px;
+}
+
+.select2-container .select2-selection:hover {
+    border-color: #376BC0;
+}
+
+.select2-container .select2-selection::before {
+    background: #376BC0;
+    content: "";
+    height: 2px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    transform: scaleX(0);
+    transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 100%;
+}
+
+.select2-container .select2-selection__clear {
+    width: 0.9em;
+    height: 0.9em;
+    line-height: 0.75em;
+    padding-left: 0.15em;
+    margin-top: 0.7em;
+    border-radius: 100%;
+    background-color: #c8c8c8;
+    color: #DC4C64;
+    float: right;
+    margin-right: 1px;
+    margin-bottom: 10px;
+}
+
+.select2-container .select2-selection--single .select2-selection__rendered {
+    display: block;
+     padding-left: 2px;
+    padding-right: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
